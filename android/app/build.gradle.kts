@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.flutter_expert_rest_api_dangeun"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -4,7 +4,9 @@ import 'package:flutter_expert_rest_api_dangeun/ui/widgets/nickname_text_form_fi
 import 'package:flutter_expert_rest_api_dangeun/ui/widgets/pw_text_form_field.dart';
 
 class JoinPage extends StatefulWidget {
-  const JoinPage({super.key});
+  const JoinPage(this.address);
+
+  final String address;
 
   @override
   State<JoinPage> createState() => _JoinPageState();
