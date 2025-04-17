@@ -5,15 +5,23 @@ import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_detail/widgets/
 import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_detail/widgets/product_detail_picture.dart';
 
 class ProductDetailPage extends StatelessWidget {
-  const ProductDetailPage({super.key});
+  ProductDetailPage(this.productId);
+
+  final int productId;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: [ProductDetailActions()]),
-      body: ListView(children: [ProductDetailPicture(), ProductDetailBody()]),
+      appBar: AppBar(actions: [ProductDetailActions(productId)]),
+      body: ListView(
+        children: [
+          ProductDetailPicture(productId),
+          ProductDetailBody(productId),
+        ],
+      ),
       bottomSheet: ProductDetailBottomSheet(
         MediaQuery.of(context).padding.bottom,
+        productId,
       ),
     );
   }

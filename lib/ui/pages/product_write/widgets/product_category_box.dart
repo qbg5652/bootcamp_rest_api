@@ -1,38 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expert_rest_api_dangeun/data/model/product.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_write/product_write_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductCategoryBox extends StatelessWidget {
-  const ProductCategoryBox({super.key});
+  ProductCategoryBox(this.product);
+
+  final Product? product;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: PopupMenuButton<String>(
-        position: PopupMenuPosition.under,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        onSelected: (value) {
-          print(value);
-        },
-        itemBuilder: (context) {
-          return [
-            categoryItem('디지털 가전', true),
-            categoryItem('생활용품', false),
-            categoryItem('도서', false),
-          ];
-        },
-        child: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(8),
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(ProductWriteViewModelProvider(product));
+        final vm = ref.read(ProductWriteViewModelProvider(product).notifier);
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: PopupMenuButton<String>(
+            position: PopupMenuPosition.under,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            onSelected: vm.onCategorySelected,
+            itemBuilder: (context) {
+              final categories = state.categories;
+              return categories.map((e) {
+                return categoryItem(
+                  e.category,
+                  e.id == state.selectedCategory?.id,
+                );
+              }).toList();
+            },
+            child: Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                state.selectedCategory?.category ?? '카테고리 선택',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ),
           ),
-          child: Text(
-            '카테고리 선택',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 

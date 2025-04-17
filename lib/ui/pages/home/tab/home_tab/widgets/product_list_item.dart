@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expert_rest_api_dangeun/core/date_time_utils.dart';
+import 'package:flutter_expert_rest_api_dangeun/data/model/product_summary.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_detail/product_detail_page.dart';
+import 'package:intl/intl.dart';
 
 class ProductListItem extends StatelessWidget {
-  const ProductListItem({super.key});
+  ProductListItem(this.productSummary);
+
+  final ProductSummary productSummary;
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,7 @@ class ProductListItem extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return ProductDetailPage();
+              return ProductDetailPage(productSummary.id);
             },
           ),
         );
@@ -30,7 +35,7 @@ class ProductListItem extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
-                  'https://picsum.photos/200/300',
+                  productSummary.thumbnail.url,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -40,13 +45,13 @@ class ProductListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('아이폰 팝니다.', style: TextStyle(fontSize: 15)),
+                  Text(productSummary.title, style: TextStyle(fontSize: 15)),
                   Text(
-                    '중동 1분전',
+                    '${productSummary.address.displayName} ${DateTimeUtils.formatString(productSummary.updatedAt)}',
                     style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                   ),
                   Text(
-                    '100,000원',
+                    NumberFormat('#,###원').format(productSummary.price),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Spacer(),
@@ -55,7 +60,10 @@ class ProductListItem extends StatelessWidget {
                     children: [
                       Icon(CupertinoIcons.heart, size: 14),
                       SizedBox(width: 4),
-                      Text('10', style: TextStyle(fontSize: 12, height: 1)),
+                      Text(
+                        '${productSummary.likeCnt}',
+                        style: TextStyle(fontSize: 12, height: 1),
+                      ),
                     ],
                   ),
                 ],

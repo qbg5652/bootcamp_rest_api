@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_detail/product_detail_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductDetailPicture extends StatelessWidget {
-  const ProductDetailPicture({super.key});
+  ProductDetailPicture(this.productId);
+
+  final int productId;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 500,
-      child: PageView.builder(
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          return Image.network(
-            'https://picsum.photos/200/300',
-            fit: BoxFit.cover,
-          );
-        },
-      ),
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(productDetailViewModelProvider(productId));
+        final imageFiles = state?.imageFiles ?? [];
+        return SizedBox(
+          height: 500,
+          child: PageView.builder(
+            itemCount: imageFiles.length,
+            itemBuilder: (context, index) {
+              return Image.network(imageFiles[index].url, fit: BoxFit.cover);
+            },
+          ),
+        );
+      },
     );
   }
 }

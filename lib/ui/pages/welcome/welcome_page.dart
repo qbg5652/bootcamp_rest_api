@@ -73,19 +73,19 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return ChatDetailPage();
-              },
-            ),
-          );
-        },
-        child: Icon(Icons.plus_one),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) {
+      //           return JoinPage('dd');
+      //         },
+      //       ),
+      //     );
+      //   },
+      //   child: Icon(Icons.plus_one),
+      // ),
     );
   }
 }

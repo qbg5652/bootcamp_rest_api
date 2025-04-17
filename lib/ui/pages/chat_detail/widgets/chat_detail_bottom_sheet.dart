@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/chat_global_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChatDetailBottomSheet extends StatefulWidget {
+class ChatDetailBottomSheet extends ConsumerStatefulWidget {
   ChatDetailBottomSheet(this.bottomPadding);
 
   final double bottomPadding;
 
   @override
-  State<ChatDetailBottomSheet> createState() => _ChatDetailBottomSheetState();
+  ConsumerState<ChatDetailBottomSheet> createState() =>
+      _ChatDetailBottomSheetState();
 }
 
-class _ChatDetailBottomSheetState extends State<ChatDetailBottomSheet> {
+class _ChatDetailBottomSheetState extends ConsumerState<ChatDetailBottomSheet> {
   final controller = TextEditingController();
 
   @override
@@ -20,6 +23,12 @@ class _ChatDetailBottomSheetState extends State<ChatDetailBottomSheet> {
 
   void onSend() {
     print('onSend Touched');
+    final vm = ref.read(ChatGlobalViewModelPrivider.notifier);
+    final text = controller.text;
+    if (text.trim().isNotEmpty) {
+      vm.send(text);
+      controller.text = '';
+    }
   }
 
   @override

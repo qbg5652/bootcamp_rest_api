@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expert_rest_api_dangeun/core/validator_util.dart';
+import 'package:flutter_expert_rest_api_dangeun/data/model/product.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/home/tab/home_tab/home_tab_view_model.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_detail/product_detail_view_model.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_write/product_write_view_model.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_write/widgets/product_category_box.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/pages/product_write/widgets/product_write_picture_area.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductWritePage extends StatefulWidget {
-  const ProductWritePage({super.key});
+  ProductWritePage(this.product);
+
+  Product? product;
 
   @override
   State<ProductWritePage> createState() => _ProductWritePageState();
 }
 
 class _ProductWritePageState extends State<ProductWritePage> {
-  final titleController = TextEditingController();
-  final priceController = TextEditingController();
-  final contentController = TextEditingController();
+  late final titleController = TextEditingController(
+    text: widget.product?.title ?? '',
+  );
+  late final priceController = TextEditingController(
+    text: widget.product?.price.toString() ?? '',
+  );
+  late final contentController = TextEditingController(
+    text: widget.product?.content ?? '',
+  );
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -25,8 +38,29 @@ class _ProductWritePageState extends State<ProductWritePage> {
     super.dispose();
   }
 
-  void onWriteDone() {
-    formKey.currentState?.validate();
+  void onWriteDone(WidgetRef ref) async {
+    if (formKey.currentState?.validate() ?? false) {
+      final vm = ref.read(
+        ProductWriteViewModelProvider(widget.product).notifier,
+      );
+      final result = await vm.upload(
+        title: titleController.text,
+        content: contentController.text,
+        price: int.parse(priceController.text),
+      );
+      if (result == true) {
+        // 홈탭 업데이트
+        ref.read(HomeTabViewModelProvider.notifier).fetchProducts();
+
+        //수정이면 디테일 페이지 업데이트!
+        if (widget.product != null) {
+          ref
+              .read(productDetailViewModelProvider(widget.product!.id).notifier)
+              .fetchDetail();
+        }
+        Navigator.pop(context);
+      }
+    }
   }
 
   @override
@@ -42,9 +76,9 @@ class _ProductWritePageState extends State<ProductWritePage> {
           child: ListView(
             padding: EdgeInsets.all(20),
             children: [
-              ProductWritePictureArea(),
+              ProductWritePictureArea(widget.product),
               SizedBox(height: 20),
-              ProductCategoryBox(),
+              ProductCategoryBox(widget.product),
               SizedBox(height: 20),
               TextFormField(
                 controller: titleController,
@@ -66,7 +100,16 @@ class _ProductWritePageState extends State<ProductWritePage> {
                 validator: ValidatorUtil.validatorContent,
               ),
               SizedBox(height: 20),
-              ElevatedButton(onPressed: onWriteDone, child: Text('작성 완료')),
+              Consumer(
+                builder: (context, ref, child) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      onWriteDone(ref);
+                    },
+                    child: Text('작성 완료'),
+                  );
+                },
+              ),
             ],
           ),
         ),

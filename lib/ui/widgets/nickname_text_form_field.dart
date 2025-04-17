@@ -10,7 +10,7 @@ class NicknameTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(hintText: '닉네임을 입력해주세요.'),
-      obscureText: true,
+      // obscureText: true,
       validator: ValidatorUtil.validatorNickname,
     );
   }

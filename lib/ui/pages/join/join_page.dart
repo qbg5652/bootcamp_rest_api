@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expert_rest_api_dangeun/core/image_picker_helper.dart';
+import 'package:flutter_expert_rest_api_dangeun/core/snackbar_util.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/join/join_view_model.dart';
+import 'package:flutter_expert_rest_api_dangeun/ui/pages/welcome/welcome_page.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/widgets/id_text_form_field.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/widgets/nickname_text_form_field.dart';
 import 'package:flutter_expert_rest_api_dangeun/ui/widgets/pw_text_form_field.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class JoinPage extends StatefulWidget {
+class JoinPage extends ConsumerStatefulWidget {
   const JoinPage(this.address);
 
   final String address;
 
   @override
-  State<JoinPage> createState() => _JoinPageState();
+  ConsumerState<JoinPage> createState() => _JoinPageState();
 }
 
-class _JoinPageState extends State<JoinPage> {
+class _JoinPageState extends ConsumerState<JoinPage> {
   final idController = TextEditingController();
   final pwController = TextEditingController();
   final nicknameController = TextEditingController();
@@ -26,17 +31,57 @@ class _JoinPageState extends State<JoinPage> {
     super.dispose();
   }
 
-  void onImageUpload() {
+  void onImageUpload() async {
     print('onImageUpload 메서드');
+    final result = await ImagePickerHelper.pickImage();
+    if (result != null) {
+      final viewModel = ref.read(JoinViewModelProvider.notifier);
+      viewModel.imageUpload(
+        fileName: result.finaname,
+        mimeType: result.mimetype,
+        bytes: result.bytes,
+      );
+    }
   }
 
-  void onJoin() {
+  void onJoin() async {
     print('onJoin 메서드');
-    formKey.currentState?.validate();
+    if (formKey.currentState?.validate() ?? false) {
+      final viewModel = ref.read(JoinViewModelProvider.notifier);
+
+      final validateResult = await viewModel.validateName(
+        userName: idController.text,
+        nickName: nicknameController.text,
+      );
+
+      if (validateResult != null) {
+        SnackbarUtil.showSnackBar(context, validateResult);
+        return;
+      }
+
+      final result = await viewModel.join(
+        userName: idController.text,
+        password: pwController.text,
+        nickName: nicknameController.text,
+        addressFulName: widget.address,
+      );
+      if (result) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => WelcomePage()),
+          (route) {
+            return false;
+          },
+        );
+      } else {
+        SnackbarUtil.showSnackBar(context, '회원가입에 실패했습니다. 다시 확인해주세요.');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final fileModel = ref.watch(JoinViewModelProvider);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -55,19 +100,30 @@ class _JoinPageState extends State<JoinPage> {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: onImageUpload,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.person, size: 30),
-                      Text('프로필 사진', style: TextStyle(fontSize: 12)),
-                    ],
+                child: Align(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                    child:
+                        fileModel != null
+                            ? ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
+                                fileModel.url,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                            : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.person, size: 30),
+                                Text('프로필 사진', style: TextStyle(fontSize: 12)),
+                              ],
+                            ),
                   ),
                 ),
               ),
